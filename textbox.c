@@ -174,7 +174,8 @@ void textbox_draw(textbox *tb)
 
 	char *line   = tb->text,
 		*text   = tb->text ? tb->text: "",
-		*prompt = tb->prompt ? tb->prompt: "";
+		*prompt = tb->prompt ? tb->prompt: "",
+		*eline  = NULL;
 
 	int text_len    = strlen(text);
 	int length      = text_len;
@@ -190,7 +191,7 @@ void textbox_draw(textbox *tb)
 		length = text_len + prompt_len;
 		cursor_offset = MIN(tb->cursor + prompt_len, length);
 
-		char eline[length + 10]; line = eline;
+		eline = calloc(1, length + 10); line = eline;
 		sprintf(line, "%s%s", prompt, text);
 
 		// replace spaces so XftTextExtents8 includes their width
@@ -207,7 +208,7 @@ void textbox_draw(textbox *tb)
 	// calc full input text width
 	XftTextExtents8(display, tb->font, (unsigned char*)line, length, &extents);
 	int line_width = extents.width;
-
+		
 	int x = 0, y = tb->font->ascent;
 	if (tb->flags & TB_RIGHT)  x = tb->w - line_width;
 	if (tb->flags & TB_CENTER) x = MAX(0, (tb->w - line_width) / 2);
@@ -225,6 +226,7 @@ void textbox_draw(textbox *tb)
 	XFreeGC(display, context);
 	XftDrawDestroy(draw);
 	XFreePixmap(display, canvas);
+	free(eline);
 }
 
 // cursor handling for edit mode
